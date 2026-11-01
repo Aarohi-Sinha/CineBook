@@ -4,10 +4,152 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+}
+
+model Movie {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  duration    Int
+  language    String
+  genre       String
+  releaseDate DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  shows       Show[]
+}
+
+model Theatre {
+  id        String   @id @default(cuid())
+  name      String
+  city      String
+  address   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screens Screen[]
+}
+
+model Screen {
+  id        String @id @default(cuid())
+  name      String
+  theatreId String
+
+  theatre Theatre @relation(fields: [theatreId], references: [id])
+  seats   Seat[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shows     Show[]
+
+  @@unique([theatreId, name])
+}
+
+model Seat {
+  id           String        @id @default(cuid())
+  row          String
+  number       Int
+  screenId     String
+  bookingSeats BookingSeat[]
+
+  screen Screen @relation(fields: [screenId], references: [id])
+
+  createdAt DateTime   @default(now())
+  showSeats ShowSeat[]
+
+  @@unique([screenId, row, number])
+}
+
+model Show {
+  id        String   @id @default(cuid())
+  movieId   String
+  screenId  String
+  startTime DateTime
+  endTime   DateTime
+  price     Decimal  @db.Decimal(10, 2)
+
+  movie    Movie     @relation(fields: [movieId], references: [id])
+  screen   Screen    @relation(fields: [screenId], references: [id])
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  showSeats ShowSeat[]
+
+  @@index([movieId, startTime])
+  @@index([screenId, startTime])
+}
+
+model Booking {
+  id     String        @id @default(cuid())
+  userId String
+  showId String
+  status BookingStatus @default(CONFIRMED)
+  total  Decimal       @db.Decimal(10, 2)
+  seats  BookingSeat[]
+
+  user User @relation(fields: [userId], references: [id])
+  show Show @relation(fields: [showId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([showId])
+}
+
+model BookingSeat {
+  id         String @id @default(cuid())
+  bookingId  String
+  showSeatId String
+
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+  showSeat ShowSeat @relation(fields: [showSeatId], references: [id])
+
+  createdAt DateTime @default(now())
+  seat      Seat?    @relation(fields: [seatId], references: [id])
+  seatId    String?
+
+  @@unique([bookingId, showSeatId])
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum ShowSeatStatus {
+  AVAILABLE
+  BOOKED
+}
+
+model ShowSeat {
+  id       String         @id @default(cuid())
+  showId   String
+  seatId   String
+  status   ShowSeatStatus @default(AVAILABLE)
+  show     Show           @relation(fields: [showId], references: [id])
+  seat     Seat           @relation(fields: [seatId], references: [id])
+  bookings BookingSeat[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([showId, seatId])
 }
