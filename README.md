@@ -36,11 +36,9 @@ CineBook provides RESTful APIs for managing movies, theatres, screens, seats, sh
 
 ```text
 CineBook/
-│
 ├── prisma/
 │   ├── migrations/
 │   └── schema.prisma
-│
 ├── src/
 │   ├── config/
 │   ├── controllers/
@@ -50,13 +48,10 @@ CineBook/
 │   ├── validators/
 │   ├── app.js
 │   └── server.js
-│
 ├── tests/
 │   ├── app.test.js
 │   └── setup.js
-│
-├── .env
-├── .env.test
+├── .env.example
 ├── .gitignore
 ├── package.json
 ├── prisma.config.ts
@@ -76,7 +71,7 @@ Make sure you have installed:
 ### 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/Aarohi-Sinha/CineBook.git
 cd CineBook
 ```
 
@@ -88,11 +83,8 @@ npm install
 
 ### 3. Configure environment variables
 
-Create a `.env` file in the project root.
-
-```env
-DATABASE_URL="postgresql://USERNAME:PASSWORD@localhost:5432/cinebook"
-JWT_SECRET="your_secure_jwt_secret"
+```bash
+copy .env.example .env
 ```
 
 Replace the database username and password with your PostgreSQL credentials.
